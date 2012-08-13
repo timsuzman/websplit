@@ -1,0 +1,100 @@
+<head>
+  <style type="text/css">
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  iframe {
+    width: 100%;
+    height: 50%;
+    border: 0;
+  }
+
+  #cover {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    cursor: row-resize;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  #gripper {
+    height: 8px;
+    margin-top: -4px;
+    cursor: row-resize;
+    background-color: black;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+  }
+  </style>
+</head>
+
+<body>
+  <iframe id="top"></iframe>
+  <iframe id="bottom"></iframe>
+
+  <div id="cover"></div>
+  <div id="gripper"></div>
+</body>
+
+<script src="http://cloud.github.com/downloads/medialize/URI.js/URI.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+
+<script>
+
+var clamp = function(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+};
+
+var percentify = function(x) {
+  return (x * 100) + "%";
+};
+
+$(function() {
+  var params = URI(document.location.href).query(true);
+  console.log(params);
+
+  $("#top").attr('src', params.top);
+  $("#bottom").attr('src', params.bottom);
+});
+
+$(function() {
+  $("#gripper").on('mousedown', function() {
+
+    var exits = [];
+
+    $("iframe").attr('scrolling', 'no');
+    exits.push(function() { $("iframe").attr('scrolling', 'auto'); });
+
+    $("#cover").show();
+    exits.push(function() { $("#cover").hide(); });
+
+    var map = {
+      mousemove: function(e) {
+        var fraction = e.clientY / $(document).height();
+        var max = 1 - $("#gripper").height() / $(document).height();
+        fraction = clamp(fraction, 0, max);
+
+        $("#gripper").css('top', percentify(fraction));
+        $("#top").css('height', percentify(fraction));
+        $("#bottom").css('height', percentify(1 - fraction));
+      }
+    };
+    $(document).on(map);
+    exits.push(function() { $(document).off(map); })
+
+    $(document).one('mouseup', function() {
+      for (i in exits) exits[i]();
+    });
+
+    // don't steal focus from other frames
+    return false;
+  });
+})
+
+</script>
