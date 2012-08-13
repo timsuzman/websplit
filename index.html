@@ -57,10 +57,8 @@ var percentify = function(x) {
 
 $(function() {
   var params = URI(document.location.href).query(true);
-  console.log(params);
-
-  $("#top").attr('src', params.top);
-  $("#bottom").attr('src', params.bottom);
+  $("#top").attr('src', params.top || prompt('Top URL:'));
+  $("#bottom").attr('src', params.bottom || prompt('Bottom URL:'));
 });
 
 $(function() {
